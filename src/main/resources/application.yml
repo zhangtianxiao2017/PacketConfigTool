@@ -1,0 +1,17 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/dev_pol?characterEncoding=utf-8
+    driver-class-name: com.mysql.jdbc.Driver
+    password: zhangtianxiao
+    username: root
+    #type: org.springframework.jdbc.datasource.SimpleDriverDataSource
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: validate
+    database-platform: org.hibernate.dialect.MySQLDialect
+  #spring.jpa.database-platform=org.hibernate.dialect.MySQLDialect
+
+logging:
+  level:
+    root: INFO
