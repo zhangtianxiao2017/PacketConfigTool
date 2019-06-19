@@ -3,6 +3,7 @@ package com.test.config;
 
 import com.test.config.dev.dao.FullPathElementDefDao;
 
+import com.test.config.dev.page.MainPage;
 import com.test.config.test.TbalePaneTest;
 
 import org.jb2011.lnf.beautyeye.BeautyEyeLNFHelper;
@@ -20,6 +21,9 @@ public class StartApp implements CommandLineRunner {
 
     @Autowired
     private FullPathElementDefDao fullPathElementDefDao;
+
+    @Autowired
+    private MainPage mainPage;
 
     public static void main(String[] args) {
 
@@ -42,6 +46,7 @@ public class StartApp implements CommandLineRunner {
 
     @Override
     public void run(String... strings) throws Exception {
-        tbalePaneTest.startTablePane();
+        //tbalePaneTest.startTablePane();
+        mainPage.pageStart();
     }
 }
