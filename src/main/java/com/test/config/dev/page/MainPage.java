@@ -33,7 +33,7 @@ public class MainPage {
         jFrame.add(jTabbedPane);
 
         // 设置页面大小
-        jFrame.setSize(1000,500);
+        jFrame.setSize(1000,600);
         // 设置页面可见性
         jFrame.setVisible(true);
     }

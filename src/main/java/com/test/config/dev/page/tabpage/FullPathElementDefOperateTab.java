@@ -85,7 +85,21 @@ public class FullPathElementDefOperateTab {
         // 添加生成json报文和excel文件的按钮
         JButton jButtonJsonCreate = new JButton("生成Json报文");
         JButton JButtonExcelCreate = new JButton("生成Excel");
+        JPanel jPanelGenerate = new JPanel();
+        jPanelGenerate.add(jButtonJsonCreate);
+        jPanelGenerate.add(JButtonExcelCreate);
 
+
+
+        // 添加删除报文记录按钮
+        JButton jButtonJsonClear = new JButton("CLEAR");
+        // 注册删除报文记录的事件
+        jButtonJsonClear.addActionListener(e -> {
+            // 清空报文记录集合
+            configPacket.clear();
+            // 报文显示置为空
+            jPanel_Right_Bottom_TextArea.setText("");
+        });
 
         // 注册生成Json报文的事件
         jButtonJsonCreate.addActionListener(e -> {
@@ -117,8 +131,8 @@ public class FullPathElementDefOperateTab {
             ContextUtil.convertFullPathElementDefVoToExcel(configPacket);
         });
 
-        jPanelRight_Top.add(jButtonJsonCreate);
-        jPanelRight_Top.add(JButtonExcelCreate);
+        jPanelRight_Top.add(jPanelGenerate);
+        jPanelRight_Top.add(jButtonJsonClear);
 
         // 生成右侧下半部分
         JPanel jPanelRight_Bottom = new JPanel();
