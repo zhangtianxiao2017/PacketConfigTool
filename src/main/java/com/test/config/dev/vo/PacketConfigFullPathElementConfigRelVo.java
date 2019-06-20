@@ -1,6 +1,5 @@
 package com.test.config.dev.vo;
 
-import com.test.config.dev.pojo.FullPathElementDefRelateToBizEntry;
 import lombok.Data;
 
 import java.util.TreeSet;

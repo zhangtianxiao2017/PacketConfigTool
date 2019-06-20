@@ -177,7 +177,7 @@ public class ContextUtil {
      * @param list
      */
     public static void convertFullPathElementDefVoToExcel(List<FullpathElementDef> list){
-        File xlsFile = new File("F:\\packetconfig\\packetconfig"+StringUtil.getNowDateString()+".xlsx");
+        File xlsFile = new File("F:\\packetconfig\\packetconfig"+StringUtil.getNowDateString()+".xls");
 
         // 创建一个工作簿
         try {
