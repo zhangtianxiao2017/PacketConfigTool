@@ -1,5 +1,6 @@
 package com.test.config.dev.page.tabpage;
 
+import com.sun.corba.se.impl.orbutil.graph.NodeData;
 import com.sun.deploy.panel.PropertyTreeModel;
 import com.test.config.dev.dao.FullPathElementDefDao;
 import com.test.config.dev.page.listener.TableMouseListener;
@@ -17,12 +18,16 @@ import org.springframework.stereotype.Component;
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragGestureListener;
-import java.awt.dnd.DragSource;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.List;
 
 import static com.sun.webkit.perf.WCFontPerfLogger.log;
@@ -98,13 +103,15 @@ public class PacketConfigTab {
                     // 生成报文树
                     PacketConfigVo packetConfigVo = packetConfigInfoAll.get(i);
                     log.info(packetConfigVo.getBizEntryDef().getEntryName()+"开始加载报文。。。。");
-                    DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode("Tree");
-                    ContextUtil.covertToNodeTree(packetConfigVo.getFullPathElementDefVo(),defaultMutableTreeNode);
 
                     // 移除原始节点数据
                     defaultMutableTreeNodeTest[0].removeAllChildren();
-                    // 添加新的报文树节点
-                    defaultMutableTreeNodeTest[0].add(defaultMutableTreeNode);
+                    //DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode("Tree");
+                    ContextUtil.covertToNodeTree(packetConfigVo.getFullPathElementDefVo(),defaultMutableTreeNodeTest[0]);
+
+
+//                    // 添加新的报文树节点
+//                    defaultMutableTreeNodeTest[0].add(defaultMutableTreeNode);
 
 //                    JTree jTree = new JTree(defaultMutableTreeNode);
 //                    jPanelCenter.removeAll();
@@ -115,7 +122,7 @@ public class PacketConfigTab {
                     // 重新加载报文树结构
                     jTreePacketModel.reload();
                     // 展开首个节点
-                    jTreePacket.expandRow(2);
+                    jTreePacket.expandRow(1);
                     log.info(packetConfigVo.getBizEntryDef().getEntryName()+"加载报文完成。。。。渲染数据。。。");
                 }
             }
@@ -136,18 +143,54 @@ public class PacketConfigTab {
         // 用节点创建树
         DefaultTreeModel jTreeFullPacketModel = new DefaultTreeModel(defaultMutableTreeNodeReal);
         JTree jTree = new JTree(jTreeFullPacketModel);
+        jTree.expandRow(1);
         // 用带有滑动条的容器来装JTree
         JScrollPane jScrollPane_Left = new JScrollPane(new JPanel().add(jTree));
         // 给jTree添加点击事件（）
+        jTree.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                // 双击时
+                if(e.getClickCount() == 2){
+                    JTree tree = (JTree) e.getSource();
+                    //tree.getLeadSelectionRow()
+                }
+            }
+        });
 
 
+/**
+ * 拖拽实现报文配置
+ */
         // 实现全量报文向配置报文子树的数据添加
         jTreePacket.setEditable(true);
         jTree.setEditable(true);
 
         DragSource dragSource = DragSource.getDefaultDragSource();
         dragSource.createDefaultDragGestureRecognizer(jTree, DnDConstants.ACTION_COPY_OR_MOVE, e -> {
+            DefaultMutableTreeNode tn = (DefaultMutableTreeNode) jTree.getLastSelectedPathComponent();
+            Transferable transferable = new StringSelection(((FullPathElementDefVo)tn.getUserObject()).toString());
+            e.startDrag(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR), transferable);
+        });
 
+        new DropTarget(jTreePacket, DnDConstants.ACTION_COPY_OR_MOVE, new DropTargetAdapter() {
+            @Override
+            public void drop(DropTargetDropEvent dtde) {
+                //接受复制、移动操作
+                dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+                //获取拖放的内容
+                Transferable transferable = dtde.getTransferable();
+                try {
+                    String s = (String) transferable.getTransferData(DataFlavor.stringFlavor);
+                    TreePath tp = jTreePacket.getPathForLocation(dtde.getLocation().x,dtde.getLocation().y);
+                    ((DefaultMutableTreeNode)tp.getLastPathComponent()).add(new DefaultMutableTreeNode(s));
+                    jTreePacket.updateUI();
+                } catch (UnsupportedFlavorException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         });
 
         jPanel.add(jPanelLeft);
