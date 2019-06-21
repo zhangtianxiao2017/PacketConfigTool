@@ -1,5 +1,6 @@
 package com.test.config.dev.page.tabpage;
 
+import com.sun.deploy.panel.PropertyTreeModel;
 import com.test.config.dev.dao.FullPathElementDefDao;
 import com.test.config.dev.page.listener.TableMouseListener;
 import com.test.config.dev.pojo.BizEntryDef;
@@ -15,7 +16,11 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DragGestureListener;
+import java.awt.dnd.DragSource;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -76,12 +81,12 @@ public class PacketConfigTab {
         jPanelLeft.add(jScrollPaneTable);
 
         JPanel jPanelCenter = new JPanel();
-        final DefaultMutableTreeNode[] defaultMutableTreeNodeTest = {new DefaultMutableTreeNode()};
-//        JTree jTreePacket = new JTree(defaultMutableTreeNodeTest[0]);
-//        jPanelCenter.add(jTreePacket);
+        final DefaultMutableTreeNode[] defaultMutableTreeNodeTest = {new DefaultMutableTreeNode("报文树结构")};
+        DefaultTreeModel jTreePacketModel = new DefaultTreeModel(defaultMutableTreeNodeTest[0]);
+        JTree jTreePacket = new JTree(jTreePacketModel);
+        jPanelCenter.add(jTreePacket);
 
         // 注册鼠标点击事件
-        // TableMouseListener tableMouseListener = new TableMouseListener();
         jTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -96,14 +101,21 @@ public class PacketConfigTab {
                     DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode("Tree");
                     ContextUtil.covertToNodeTree(packetConfigVo.getFullPathElementDefVo(),defaultMutableTreeNode);
 
+                    // 移除原始节点数据
+                    defaultMutableTreeNodeTest[0].removeAllChildren();
+                    // 添加新的报文树节点
+                    defaultMutableTreeNodeTest[0].add(defaultMutableTreeNode);
 
-                    defaultMutableTreeNodeTest[0] = defaultMutableTreeNode;
+//                    JTree jTree = new JTree(defaultMutableTreeNode);
+//                    jPanelCenter.removeAll();
+//                    // 展开首个节点信息
+//                    jTree.expandRow(1);
+//                    jPanelCenter.add(jTree);
 
-                    JTree jTree = new JTree(defaultMutableTreeNode);
-                    jPanelCenter.removeAll();
-                    // 展开首个节点信息
-                    jTree.expandRow(1);
-                    jPanelCenter.add(jTree);
+                    // 重新加载报文树结构
+                    jTreePacketModel.reload();
+                    // 展开首个节点
+                    jTreePacket.expandRow(2);
                     log.info(packetConfigVo.getBizEntryDef().getEntryName()+"加载报文完成。。。。渲染数据。。。");
                 }
             }
@@ -118,16 +130,25 @@ public class PacketConfigTab {
         // 打包分类
         FullPathElementDefVo fullPathElementDefVo = ContextUtil.packFullPathElement(all);
         // 生成树的节点
-        DefaultMutableTreeNode defaultMutableTreeNodeReal = new DefaultMutableTreeNode("realRoot");
+        DefaultMutableTreeNode defaultMutableTreeNodeReal = new DefaultMutableTreeNode("全量报文数据");
         // FullPathElementDefVo 转成 TreeNode
         ContextUtil.covertToNodeTree(fullPathElementDefVo,defaultMutableTreeNodeReal);
         // 用节点创建树
-        JTree jTree = new JTree(defaultMutableTreeNodeReal);
+        DefaultTreeModel jTreeFullPacketModel = new DefaultTreeModel(defaultMutableTreeNodeReal);
+        JTree jTree = new JTree(jTreeFullPacketModel);
         // 用带有滑动条的容器来装JTree
         JScrollPane jScrollPane_Left = new JScrollPane(new JPanel().add(jTree));
         // 给jTree添加点击事件（）
 
 
+        // 实现全量报文向配置报文子树的数据添加
+        jTreePacket.setEditable(true);
+        jTree.setEditable(true);
+
+        DragSource dragSource = DragSource.getDefaultDragSource();
+        dragSource.createDefaultDragGestureRecognizer(jTree, DnDConstants.ACTION_COPY_OR_MOVE, e -> {
+
+        });
 
         jPanel.add(jPanelLeft);
         jPanel.add(jScrollPaneCenter);
