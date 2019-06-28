@@ -77,6 +77,7 @@ public class PacketConfigService {
             // 4. 报文集合转换成PacketConfigFullPathElementConfigVo
             FullPathElementDefVo fullPathElementDefVo = ContextUtil.packFullPathElement(fullPathElementDefRelateToBizEntries);
             packetConfigVo.setFullPathElementDefVo(fullPathElementDefVo);
+            packetConfigVo.setFullpathElementDefs(fullPathElementDefRelateToBizEntries);
 
 
             packetConfigVoList.add(packetConfigVo);

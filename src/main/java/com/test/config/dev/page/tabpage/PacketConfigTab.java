@@ -43,6 +43,8 @@ public class PacketConfigTab {
     @Autowired
     private FullPathElementDefDao fullPathElementDefDao;
 
+    private Integer jTableSelectIndex = -1;
+
     public java.awt.Component createPacketConfigTab(){
         JPanel jPanel = new JPanel();
         jPanel.setLayout(new GridLayout(1,3));
@@ -100,6 +102,10 @@ public class PacketConfigTab {
                     // 获取点击的index
                     JTable source = (JTable) e.getSource();
                     int i = source.rowAtPoint(e.getPoint());
+
+                    // 保存索引
+                    jTableSelectIndex = i;
+
                     // 生成报文树
                     PacketConfigVo packetConfigVo = packetConfigInfoAll.get(i);
                     log.info(packetConfigVo.getBizEntryDef().getEntryName()+"开始加载报文。。。。");
@@ -153,7 +159,44 @@ public class PacketConfigTab {
                 // 双击时
                 if(e.getClickCount() == 2){
                     JTree tree = (JTree) e.getSource();
-                    //tree.getLeadSelectionRow()
+                    // 双击后获取选中的值
+                    DefaultMutableTreeNode selectionNode = (DefaultMutableTreeNode) tree
+                            .getLastSelectedPathComponent();
+
+                    FullPathElementDefVo pathElementDefVo = (FullPathElementDefVo) selectionNode.getUserObject();
+
+                    if(jTableSelectIndex == -1){
+                        log.info("报文还没初始化！");
+                        return;
+                    }
+
+                    // 获取报文原始数据集合
+                    PacketConfigVo packetConfigVo = packetConfigInfoAll.get(jTableSelectIndex);
+                    List<FullpathElementDef> fullpathElementDefs = packetConfigVo.getFullpathElementDefs();
+
+                    // 将该条记录加入被配置的报文中
+                    fullpathElementDefs.add(pathElementDefVo.getOwnFullPathElement());
+
+
+                    // 将该条数据加入数据库
+                    // 入库逻辑
+
+                    // 重新打包
+                    FullPathElementDefVo fullPathElementDefVo1 = ContextUtil.packFullPathElement(fullpathElementDefs);
+
+                    // 保存
+                    packetConfigVo.setFullPathElementDefVo(fullPathElementDefVo1);
+
+                    // 移除原始节点数据
+                    defaultMutableTreeNodeTest[0].removeAllChildren();
+                    // DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode("Tree");
+                    ContextUtil.covertToNodeTree(fullPathElementDefVo1,defaultMutableTreeNodeTest[0]);
+
+                    // 重新渲染报文树
+                    jTreePacketModel.reload();
+
+                    // 展开节点
+                    jTreePacket.expandRow(1);
                 }
             }
         });
@@ -162,36 +205,36 @@ public class PacketConfigTab {
 /**
  * 拖拽实现报文配置
  */
-        // 实现全量报文向配置报文子树的数据添加
-        jTreePacket.setEditable(true);
-        jTree.setEditable(true);
-
-        DragSource dragSource = DragSource.getDefaultDragSource();
-        dragSource.createDefaultDragGestureRecognizer(jTree, DnDConstants.ACTION_COPY_OR_MOVE, e -> {
-            DefaultMutableTreeNode tn = (DefaultMutableTreeNode) jTree.getLastSelectedPathComponent();
-            Transferable transferable = new StringSelection(((FullPathElementDefVo)tn.getUserObject()).toString());
-            e.startDrag(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR), transferable);
-        });
-
-        new DropTarget(jTreePacket, DnDConstants.ACTION_COPY_OR_MOVE, new DropTargetAdapter() {
-            @Override
-            public void drop(DropTargetDropEvent dtde) {
-                //接受复制、移动操作
-                dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-                //获取拖放的内容
-                Transferable transferable = dtde.getTransferable();
-                try {
-                    String s = (String) transferable.getTransferData(DataFlavor.stringFlavor);
-                    TreePath tp = jTreePacket.getPathForLocation(dtde.getLocation().x,dtde.getLocation().y);
-                    ((DefaultMutableTreeNode)tp.getLastPathComponent()).add(new DefaultMutableTreeNode(s));
-                    jTreePacket.updateUI();
-                } catch (UnsupportedFlavorException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+//        // 实现全量报文向配置报文子树的数据添加
+//        jTreePacket.setEditable(true);
+//        jTree.setEditable(true);
+//
+//        DragSource dragSource = DragSource.getDefaultDragSource();
+//        dragSource.createDefaultDragGestureRecognizer(jTree, DnDConstants.ACTION_COPY_OR_MOVE, e -> {
+//            DefaultMutableTreeNode tn = (DefaultMutableTreeNode) jTree.getLastSelectedPathComponent();
+//            Transferable transferable = new StringSelection(((FullPathElementDefVo)tn.getUserObject()).toString());
+//            e.startDrag(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR), transferable);
+//        });
+//
+//        new DropTarget(jTreePacket, DnDConstants.ACTION_COPY_OR_MOVE, new DropTargetAdapter() {
+//            @Override
+//            public void drop(DropTargetDropEvent dtde) {
+//                //接受复制、移动操作
+//                dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+//                //获取拖放的内容
+//                Transferable transferable = dtde.getTransferable();
+//                try {
+//                    String s = (String) transferable.getTransferData(DataFlavor.stringFlavor);
+//                    TreePath tp = jTreePacket.getPathForLocation(dtde.getLocation().x,dtde.getLocation().y);
+//                    ((DefaultMutableTreeNode)tp.getLastPathComponent()).add(new DefaultMutableTreeNode(s));
+//                    jTreePacket.updateUI();
+//                } catch (UnsupportedFlavorException e) {
+//                    e.printStackTrace();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
 
         jPanel.add(jPanelLeft);
         jPanel.add(jScrollPaneCenter);

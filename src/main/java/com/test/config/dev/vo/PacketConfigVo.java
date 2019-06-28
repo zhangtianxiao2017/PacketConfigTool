@@ -3,6 +3,7 @@ package com.test.config.dev.vo;
 import com.test.config.dev.dao.FullPathElementDefDao;
 import com.test.config.dev.pojo.BizEntryDef;
 import com.test.config.dev.pojo.BizFactorDef;
+import com.test.config.dev.pojo.FullpathElementDef;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -26,4 +27,9 @@ public class PacketConfigVo {
      * 批单类型信息
      */
     private FullPathElementDefVo fullPathElementDefVo;
+
+    /**
+     * 报文集合
+     */
+    private List<FullpathElementDef> fullpathElementDefs;
 }
