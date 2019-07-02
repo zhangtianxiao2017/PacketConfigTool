@@ -2,6 +2,7 @@ package com.test.config.dev.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+
 import com.test.config.dev.pojo.FullpathElementDef;
 import com.test.config.dev.vo.FullPathElementDefVo;
 import jxl.Workbook;
@@ -11,9 +12,11 @@ import jxl.write.WritableWorkbook;
 
 import javax.swing.tree.DefaultMutableTreeNode;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ContextUtil {
 
@@ -91,6 +94,40 @@ public class ContextUtil {
         }
     }
 
+
+    public static void generateJSONFile(String json, String fileName){
+        // 生成报文文件 packet.json
+        File file = new File("F:\\packetconfig\\"+fileName+ StringUtil.getNowDateString() +".json");
+        try {
+            FileWriter fileWriter = new FileWriter(file);
+
+            fileWriter.write(json);
+
+            fileWriter.close();
+        } catch (Exception  e1) {
+            e1.printStackTrace();
+        }
+    }
+
+    /**
+     * 根据JSON字符串生成JSON文件
+     * @param json
+     */
+    public static void generateJSONFile(String json){
+        // 生成报文文件 packet.json
+        File file = new File("F:\\packetconfig\\packetconfig"+ StringUtil.getNowDateString() +".json");
+        try {
+            FileWriter fileWriter = new FileWriter(file);
+
+            fileWriter.write(json);
+
+            fileWriter.close();
+        } catch (Exception  e1) {
+            e1.printStackTrace();
+        }
+    }
+
+
     /**
      * 生成Json
      * @param fullPathElementDefVo
@@ -109,6 +146,13 @@ public class ContextUtil {
         map.put("operator", "批单录入人员Code");
         map.put("entryType", "录入方式\\n单笔录入（00）/批量导入（01）/事后补录（03）'");
 
+        // 对map进行排序
+        Comparator<Map.Entry<String, Object>> valueComparatordesc = (o1, o2) -> ObjectNum.getObjectTypeNum(o1.getValue())-ObjectNum.getObjectTypeNum(o2.getValue()) >= 0 ? 1 : -1;
+        List<Map.Entry<String, Object>> list = new ArrayList<Map.Entry<String, Object>>(map.entrySet());
+        Collections.sort(list,valueComparatordesc);
+
+        HashMap hashMap = new HashMap();
+
         return JSON.toJSONString(map, SerializerFeature.PrettyFormat);
     }
 
@@ -120,7 +164,10 @@ public class ContextUtil {
      */
     public static Map<String,Object> convertFullPathElementDefVoToMap(FullPathElementDefVo fullPathElementDefVo){
 
-        Map<String, Object> resultMap = new LinkedHashMap<String, Object> ();
+
+        // 根据类型进行排序
+        Map<String, Object> resultMap = new TreeMap<>();
+
 
         FullpathElementDef ownFullPathElement = fullPathElementDefVo.getOwnFullPathElement();
         String key = ownFullPathElement.getJsonItemPath();
@@ -170,6 +217,17 @@ public class ContextUtil {
 
         SimpleDateFormat sd = new SimpleDateFormat("yyyyMMddhh:mm:ss");
         System.out.println(sd.format(date));
+
+
+        // 验证TreeMap排序
+        TreeMap<String,Object> treeMap = new TreeMap<>();
+        treeMap.put("1",new ArrayList<>());
+        treeMap.put("2",new String());
+        treeMap.put("3",new HashMap<>());
+
+
+        System.out.println(treeMap);
+
     }
 
     /**
@@ -202,18 +260,18 @@ public class ContextUtil {
 
 
             // 遍历集合
-            for(int i = 1; i < row; i++){
+            for(int i = 0; i < row; i++){
 
                 // 写入一行数据
                 FullpathElementDef fullpathElementDef = list.get(i);
 
-                sheet.addCell(new Label(2, i, fullpathElementDef.getId()+""));
+                sheet.addCell(new Label(2, i+1, fullpathElementDef.getId()+""));
 
-                sheet.addCell(new Label(4, i,"N"));
-                sheet.addCell(new Label(5, i,"N"));
-                sheet.addCell(new Label(6, i,"Y"));
+                sheet.addCell(new Label(4, i+1,"N"));
+                sheet.addCell(new Label(5, i+1,"N"));
+                sheet.addCell(new Label(6, i+1,"Y"));
 
-                sheet.addCell(new Label(7, i, fullpathElementDef.getDesc()+""));
+                sheet.addCell(new Label(7, i+1, fullpathElementDef.getDesc()+""));
 
             }
 

@@ -41,6 +41,8 @@ public class FullPathElementDefOperateTab {
     public java.awt.Component createFullPathElementDefTab(){
         // test 报文配置结果
         List<FullpathElementDef> configPacket = new ArrayList<>();
+        // 报文配置结果
+
 
         // JPanel采用网络布局 一分为2 左边放 FullPathElementTree 右边显示 点击节点的数据 （和操作按钮）
         JPanel jPanel = new JPanel();

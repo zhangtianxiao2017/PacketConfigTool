@@ -87,6 +87,20 @@ public class PacketConfigTab {
                 JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         jPanelLeft.add(jScrollPaneTable);
 
+        // 左侧边栏添加选中报文生成JSON的按钮
+        JButton jButtonGenerateJSON = new JButton("生成JSON");
+        jPanelLeft.add(jButtonGenerateJSON);
+        // 给按钮注册点击事件
+        jButtonGenerateJSON.addActionListener(e -> {
+            // 生成JSON
+            // 获取选中的报文对象
+            PacketConfigVo packetConfigVo = packetConfigInfoAll.get(jTableSelectIndex);
+            String json = ContextUtil.convertFullPathElementDefVoToJson(packetConfigVo.getFullPathElementDefVo());
+            ContextUtil.generateJSONFile(json,packetConfigVo.getBizEntryDef().getEntryName());
+        });
+
+
+
         JPanel jPanelCenter = new JPanel();
         final DefaultMutableTreeNode[] defaultMutableTreeNodeTest = {new DefaultMutableTreeNode("报文树结构")};
         DefaultTreeModel jTreePacketModel = new DefaultTreeModel(defaultMutableTreeNodeTest[0]);
